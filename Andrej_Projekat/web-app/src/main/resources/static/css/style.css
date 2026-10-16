@@ -63,14 +63,15 @@ header,
     flex-wrap: wrap;
     padding: 14px 30px;
     color: #f7ecd2;
+    background-color: #4a2f1a;
     background-image:
-        linear-gradient(rgba(30, 17, 6, .42), rgba(30, 17, 6, .66)),
-        url('/images/plank.jpg');
-    background-size: cover, cover;
+        repeating-linear-gradient(90deg, rgba(0, 0, 0, .16) 0, rgba(0, 0, 0, .16) 1px, transparent 1px, transparent 46px),
+        linear-gradient(180deg, #6a4526 0%, #59391f 45%, #3f2610 100%);
+    background-size: auto, auto;
     background-position: center, center;
-    background-repeat: no-repeat, no-repeat;
+    background-repeat: repeat, no-repeat;
     border-bottom: 3px solid #170d04;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, .5);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 220, 150, .14);
 }
 
 .brand,
@@ -260,14 +261,16 @@ h2,
 .empty-state,
 .expense,
 .note {
-    background-color: var(--paper);
-    background-image: url('/images/paper.png');
-    background-size: cover;
-    background-position: center;
-    background-blend-mode: multiply;
+    background-color: #f6ecd2;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+        linear-gradient(160deg, #fbf4e0 0%, #f4e8cb 55%, #ecdcb8 100%);
+    background-size: 140px 140px, cover;
+    background-repeat: repeat, no-repeat;
     color: var(--ink);
-    border-radius: 12px;
-    box-shadow: var(--shadow-card), inset 0 0 0 1px rgba(122, 92, 52, .18);
+    border: 1px solid rgba(120, 90, 45, .28);
+    border-radius: 5px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .55), inset 0 -2px 6px rgba(120, 90, 45, .12);
     padding: 24px;
 }
 
