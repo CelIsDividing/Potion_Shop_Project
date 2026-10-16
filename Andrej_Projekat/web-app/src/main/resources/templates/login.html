@@ -3,33 +3,13 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Login - Cafe Shop</title>
+    <title>Login - Potion Store</title>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
-    <style>
-        .brand { text-align: center; margin-bottom: 2rem; }
-        .brand .logo { font-size: 2.5rem; }
-        .brand h1 { font-size: 1.6rem; margin-top: 0.4rem; }
-        .login-form input[type=text],
-        .login-form input[type=email],
-        .login-form input[type=password] {
-            display: block; width: 100%;
-            padding: 0.65rem 0.9rem;
-            font-size: 1rem;
-            border: 1px solid #334;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.08);
-            color: #000000;
-            margin-bottom: 0.75rem;
-        }
-        .login-form input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,0.3); }
-        .login-form label { margin-bottom: 0.3rem; }
-    </style>
 </head>
-<body>
-    <div class="container">
-        <br><br><br><br><br><br><br>
+<body class="login-page">
+    <div class="container note">
         <div class="brand">
-            <div class="logo"></div>
+            <div class="brand-logo">PS</div>
             <h1>Potion Store</h1>
             <p class="subtitle">Speak the right words to be allowed entry</p>
         </div>
@@ -38,12 +18,12 @@
 
         <form th:action="@{/login}" method="post" class="login-form">
             <label for="email">What do people call you?</label>
-            <input type="email" id="email" name="email" required placeholder="e.g. ana.jovanovic@example.com" autocomplete="email"/>
+            <input type="email" id="email" name="email" required
+                   placeholder="e.g. ana.jovanovic@example.com" autocomplete="email"/>
             <label for="password">SPEAK THE MAGIC WORDS!!!!!</label>
             <input type="password" id="password" name="password" required autocomplete="current-password"/>
             <button type="submit">PROCEED FORWARD</button>
         </form>
-        <br><br><br>
     </div>
 </body>
 </html>

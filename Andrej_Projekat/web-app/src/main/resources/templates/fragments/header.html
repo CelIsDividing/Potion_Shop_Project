@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<body>
+<header class="site-header" th:fragment="header">
+    <a class="brand" th:href="@{/orders}">Potion Store</a>
+    <nav class="header-actions">
+        <a th:href="@{/orders}">Orders</a>
+        <a th:href="@{/cards}">Cards</a>
+        <a class="notif-link" th:href="@{/notifications}">Notifications
+            <span class="notif-badge"
+                  th:if="${unreadNotifCount != null and unreadNotifCount > 0}"
+                  th:text="${unreadNotifCount}">1</span>
+        </a>
+        <span class="user-name" th:if="${userName != null}" th:text="'Hello, ' + ${userName}">Hello</span>
+        <form class="logout-form" th:action="@{/logout}" method="post">
+            <button class="logout-btn" type="submit">Log out</button>
+        </form>
+    </nav>
+</header>
+</body>
+</html>

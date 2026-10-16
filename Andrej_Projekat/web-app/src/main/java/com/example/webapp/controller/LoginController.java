@@ -31,6 +31,7 @@ public class LoginController {
         try {
             UserDto user = userServiceClient.getUserById(userId);
             model.addAttribute("user", user);
+            model.addAttribute("userName", user.getName());
             return "home";
         } catch (FeignException.NotFound e) {
             session.invalidate();

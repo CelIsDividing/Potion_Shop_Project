@@ -3,126 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Admin Panel</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', sans-serif; 
-            background-image: url('/images/wood-background.jpg');
-            background-size: cover;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            min-height: 100vh;
-            color: #1e293b; }
-
-        /* ---- TOP BAR ---- */
-        .topbar { 
-            background-image: url('/images/plank.png');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            color: #fff; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
-        .topbar h1 { font-size: 1.2rem; letter-spacing: .5px; }
-        .topbar-right { display: flex; align-items: center; gap: 14px; font-size: 0.9rem; opacity: .85; }
-        .btn-logout { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,0.4); padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
-        .btn-logout:hover { background: #b91c1c; }
-
-        /* ---- TABS ---- */
-        .tab-bar { background: #fff; border-bottom: 2px solid #e2e8f0; padding: 0 32px; display: flex; gap: 0; }
-        .tab-btn { padding: 14px 28px; font-size: 0.95rem; font-weight: 600; border: none; background: none; cursor: pointer; color: #64748b; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .15s; }
-        .tab-btn:hover { color: #fecf13; }
-        .tab-btn.active { color: #fecf13; border-bottom-color: #fecf13; }
-
-        /* ---- LAYOUT ---- */
-        .container { max-width: 1100px; margin: 32px auto; padding: 0 24px; }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
-
-        /* ---- CARD ---- */
-        .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.07); padding: 24px; margin-bottom: 28px; }
-        .card h2 { font-size: 1.15rem; color: #1e3a5f; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; }
-
-        /* ---- ALERTS ---- */
-        .alert { padding: 12px 18px; border-radius: 8px; margin-bottom: 22px; font-size: 0.9rem; }
-        .alert-success { background: #dcfce7; color: #166534; }
-        .alert-error   { background: #fee2e2; color: #991b1b; }
-
-        /* ---- TABLE ---- */
-        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-        th { background: #f8fafc; font-weight: 700; color: #64748b; text-transform: uppercase; font-size: 0.72rem; letter-spacing: .06em; padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: #f8fafc; }
-
-        /* ---- BADGES ---- */
-        .badge { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
-        .badge-bronze { background: #fef3c7; color: #92400e; }
-        .badge-silver { background: #e2e8f0; color: #475569; }
-        .badge-gold   { background: #fef9c3; color: #854d0e; }
-        .badge-custom { background: #ede9fe; color: #5b21b6; }
-        .badge-allergen { background: #fee2e2; color: #991b1b; font-size: 0.7rem; padding: 2px 7px; border-radius: 12px; margin: 1px; display: inline-block; }
-
-        /* ---- FORMS ---- */
-        .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
-        .form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 130px; }
-        .form-group.narrow { max-width: 110px; }
-        .form-group.wide { flex: 2; }
-        label.field-label { font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .04em; }
-        input[type=text], input[type=number], textarea, select {
-            padding: 8px 11px; border: 1px solid #cbd5e1; border-radius: 8px;
-            font-size: 0.88rem; width: 100%; background: #fff; color: #1e293b;
-        }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,.15); }
-        textarea { resize: vertical; min-height: 56px; }
-
-        /* ---- ALLERGEN CHECKBOXES ---- */
-        .allergen-grid { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
-        .allergen-check { display: flex; align-items: center; gap: 5px; font-size: 0.82rem; color: #475569; }
-        .allergen-check input { width: auto; accent-color: #2563eb; cursor: pointer; }
-        .allergen-check label { cursor: pointer; font-weight: normal; }
-
-        /* ---- BUTTONS ---- */
-        .btn { padding: 8px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 0.84rem; font-weight: 600; white-space: nowrap; }
-        .btn-primary { background: #2563eb; color: #fff; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-warning { background: #f59e0b; color: #fff; }
-        .btn-warning:hover { background: #d97706; }
-        .btn-danger { background: #ef4444; color: #fff; }
-        .btn-danger:hover { background: #dc2626; }
-        .btn-sm { padding: 5px 12px; font-size: 0.78rem; }
-
-        /* ---- INLINE EDIT (details/summary) ---- */
-        details { margin-top: 6px; }
-        summary { cursor: pointer; font-size: 0.82rem; color: #2563eb; user-select: none; }
-        summary:hover { text-decoration: underline; }
-        .edit-panel { margin-top: 10px; padding: 14px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
-        .action-cell { display: flex; flex-direction: column; gap: 4px; }
-
-        /* ---- ANALYTICS ---- */
-        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
-        @media (max-width: 800px) { .analytics-grid { grid-template-columns: 1fr; } }
-        .analytics-grid .card { margin-bottom: 0; }
-        .stat-rank { width: 36px; text-align: center; font-size: 0.85rem; font-weight: 700; }
-        .rank-1 { color: #f59e0b; }
-        .rank-2 { color: #94a3b8; }
-        .rank-3 { color: #b45309; }
-        .bar-cell { min-width: 120px; }
-        .bar-wrap { background: #e2e8f0; border-radius: 99px; height: 8px; overflow: hidden; }
-        .bar-fill  { background: #2563eb; height: 8px; border-radius: 99px; transition: width .4s; }
-        .bar-fill.green  { background: #16a34a; }
-        .bar-fill.purple { background: #7c3aed; }
-        .bar-fill.amber  { background: #d97706; }
-        .revenue-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
-        .rev-tab { padding: 5px 14px; border-radius: 20px; border: 1.5px solid #cbd5e1; background: #fff;
-                   font-size: 0.8rem; font-weight: 600; cursor: pointer; color: #475569; transition: all .15s; }
-        .rev-tab.active { background: #2563eb; color: #fff; border-color: #2563eb; }
-        .revenue-panel { display: none; }
-        .revenue-panel.active { display: block; }
-        .combo-badge { display: inline-flex; align-items: center; gap: 6px; }
-        .combo-sep { color: #94a3b8; font-size: 0.75rem; }
-        .empty-note { color: #94a3b8; font-size: 0.84rem; font-style: italic; padding: 12px 0; }
-        .vip-avatar { width: 30px; height: 30px; border-radius: 50%; background: #dbeafe;
-                      display: inline-flex; align-items: center; justify-content: center;
-                      font-size: 0.75rem; font-weight: 700; color: #1d4ed8; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
 <body>
 
@@ -144,7 +25,7 @@
     <button class="tab-btn" th:classappend="${tab == 'analytics'} ? ' active'" onclick="switchTab('analytics')">Analytics</button>
 </div>
 
-<div class="container">
+<div class="container wide">
 
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}"   class="alert alert-error"   th:text="${error}"></div>
@@ -313,13 +194,13 @@
                 <tr th:each="p : ${products}">
                     <td th:text="${p.id}"></td>
                     <td><strong th:text="${p.name}"></strong></td>
-                    <td style="max-width:180px;font-size:0.82rem;color:#64748b;" th:text="${p.description}"></td>
+                    <td style="max-width:180px;font-size:0.82rem;color:#6f5940;" th:text="${p.description}"></td>
                     <td th:text="${#numbers.formatDecimal(p.price,1,2)} + ' GOLD'"></td>
                     <td th:text="${p.size != null ? p.size : '&mdash;'}"></td>
                     <td th:text="${p.calories != null ? p.calories : '&mdash;'}"></td>
                     <td>
                         <span th:each="a : ${p.allergens}" class="badge-allergen" th:text="${a.name}"></span>
-                        <span th:if="${p.allergens == null or #lists.isEmpty(p.allergens)}" style="color:#cbd5e1;font-size:0.78rem;">&mdash;</span>
+                        <span th:if="${p.allergens == null or #lists.isEmpty(p.allergens)}" style="color:#b9a37f;font-size:0.78rem;">&mdash;</span>
                     </td>
                     <td>
                         <div class="action-cell">
@@ -379,7 +260,7 @@
 
             <!-- Add product -->
             <div style="margin-top:18px;padding-top:16px;border-top:1px solid #e2e8f0;">
-                <h3 style="font-size:0.95rem;color:#1e3a5f;margin-bottom:12px;">Add New Product</h3>
+                <h3 style="font-size:0.95rem;color:#5a3d15;margin-bottom:12px;">Add New Product</h3>
                 <form action="/admin/catalog/products" method="post">
                     <div class="form-row" style="margin-bottom:10px;">
                         <div class="form-group">
@@ -432,12 +313,12 @@
                 <tr th:each="e : ${extras}">
                     <td th:text="${e.id}"></td>
                     <td><strong th:text="${e.name}"></strong></td>
-                    <td style="max-width:180px;font-size:0.82rem;color:#64748b;" th:text="${e.description}"></td>
+                    <td style="max-width:180px;font-size:0.82rem;color:#6f5940;" th:text="${e.description}"></td>
                     <td th:text="${#numbers.formatDecimal(e.price,1,2)} + ' GOLD'"></td>
                     <td th:text="${e.calories != null ? e.calories : '&mdash;'}"></td>
                     <td>
                         <span th:each="a : ${e.allergens}" class="badge-allergen" th:text="${a.name}"></span>
-                        <span th:if="${e.allergens == null or #lists.isEmpty(e.allergens)}" style="color:#cbd5e1;font-size:0.78rem;">&mdash;</span>
+                        <span th:if="${e.allergens == null or #lists.isEmpty(e.allergens)}" style="color:#b9a37f;font-size:0.78rem;">&mdash;</span>
                     </td>
                     <td>
                         <div class="action-cell">
@@ -493,7 +374,7 @@
 
             <!-- Add extra -->
             <div style="margin-top:18px;padding-top:16px;border-top:1px solid #e2e8f0;">
-                <h3 style="font-size:0.95rem;color:#1e3a5f;margin-bottom:12px;">Add New Add-on</h3>
+                <h3 style="font-size:0.95rem;color:#5a3d15;margin-bottom:12px;">Add New Add-on</h3>
                 <form action="/admin/catalog/extras" method="post">
                     <div class="form-row" style="margin-bottom:10px;">
                         <div class="form-group">
