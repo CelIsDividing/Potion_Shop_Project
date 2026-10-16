@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Home</title>
+    <link rel="stylesheet" th:href="@{/css/background.css}"/>
+    <style>
+        .container { max-width: 920px; margin: 40px auto; padding: 0 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+        h1 { color: #ffffff; font-size: 1.8rem; margin-bottom: 24px; }
+        h2 { color: #ffffff; font-size: 1.4rem; margin-bottom: 16px; }
+        .profile { background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 28px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+        .profile p { color: #334155; font-size: 1.05rem; margin: 10px 0; }
+        .profile strong { color: #1e3a5f; }
+        .logout-form { display: inline-block; }
+        .logout-form button { background: transparent; border: 1px solid rgba(255, 255, 255, 0.4); color: white; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
+        .logout-form button:hover { background: rgba(255, 255, 255, 0.15); }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Potion Store</h1>
+    <form th:action="@{/logout}" method="post" class="logout-form">
+        <button type="submit">BEGONE!</button>
+    </form>
+</header>
+
+<div class="container">
+    <section class="profile">
+        <h2>Profile</h2>
+        <p><strong>Name:</strong> <span th:text="${user.name}">-</span></p>
+        <p><strong>Email:</strong> <span th:text="${user.email}">-</span></p>
+        <div th:if="${user.loyaltyAccount != null}">
+            <p><strong>Loyalty points:</strong> <span th:text="${user.loyaltyAccount.points}">0</span></p>
+            <p><strong>Tier:</strong> <span th:text="${user.loyaltyAccount.tier}">BRONZE</span></p>
+        </div>
+    </section>
+</div>
+</body>
+</html>

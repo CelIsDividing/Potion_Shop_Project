@@ -1,0 +1,172 @@
+# ---------------------------------------------------------------------------
+# Render Blueprint for the Potion Shop microservices stack.
+#
+# This file is expected to live at the ROOT of the Git repository that
+# Render builds from (the folder that also contains Andrej_Projekat/ and
+# .gitignore). If your repo root is the Andrej_Projekat/ folder instead,
+# remove the leading "Andrej_Projekat/" from every dockerfilePath and
+# dockerContext value below.
+#
+# Deploy:
+#   1. Push this file to your repo's default branch.
+#   2. Render Dashboard -> New + -> Blueprint -> pick this repo -> Apply.
+#   3. When prompted, fill in the "potionshop-shared" group values for your
+#      external PostgreSQL: DB_URL, DB_USERNAME, DB_PASSWORD.
+#
+# Notes:
+#   * Every service below is a FREE public web service. On the free tier,
+#     services cannot use Render's private network for inbound traffic, so
+#     they talk to each other over their public https://<name>.onrender.com
+#     URLs (Eureka registers the public hostname + secure port 443).
+#   * Free services sleep after ~15 minutes of inactivity; the first request
+#     afterwards triggers a cold start (~1 minute).
+#   * Service names must be globally unique on *.onrender.com. If a name is
+#     taken, change it here AND update EUREKA_URL / GATEWAY_URL accordingly.
+# ---------------------------------------------------------------------------
+
+envVarGroups:
+  - name: potionshop-shared
+    envVars:
+      # External PostgreSQL connection (filled in the Render dashboard).
+      # DB_URL example: jdbc:postgresql://HOST:5432/potionShop?sslmode=require
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      # Shared secrets, generated once and injected into every service so
+      # they all match (e.g. the gateway and user-service share JWT_SECRET).
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GATEWAY_API_KEY
+        generateValue: true
+      # Public location of the Eureka registry.
+      - key: EUREKA_URL
+        value: https://potionshop-eureka.onrender.com/eureka/
+
+services:
+  # ----------------------------- Eureka ------------------------------------
+  - type: web
+    name: potionshop-eureka
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Andrej_Projekat/eureka-server/Dockerfile
+    dockerContext: ./Andrej_Projekat/eureka-server
+    envVars:
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=70.0
+
+  # --------------------------- Business services ---------------------------
+  - type: web
+    name: potionshop-user-service
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Andrej_Projekat/user-service/Dockerfile
+    dockerContext: ./Andrej_Projekat/user-service
+    envVars:
+      - fromGroup: potionshop-shared
+      - key: EUREKA_TLS
+        value: "true"
+      - key: EUREKA_PREFER_IP
+        value: "false"
+      - key: EUREKA_PLAIN
+        value: "false"
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=70.0
+
+  - type: web
+    name: potionshop-order-service
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Andrej_Projekat/order-service/Dockerfile
+    dockerContext: ./Andrej_Projekat/order-service
+    envVars:
+      - fromGroup: potionshop-shared
+      - key: EUREKA_TLS
+        value: "true"
+      - key: EUREKA_PREFER_IP
+        value: "false"
+      - key: EUREKA_PLAIN
+        value: "false"
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=70.0
+
+  - type: web
+    name: potionshop-payment-service
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Andrej_Projekat/payment-service/Dockerfile
+    dockerContext: ./Andrej_Projekat/payment-service
+    envVars:
+      - fromGroup: potionshop-shared
+      - key: EUREKA_TLS
+        value: "true"
+      - key: EUREKA_PREFER_IP
+        value: "false"
+      - key: EUREKA_PLAIN
+        value: "false"
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=70.0
+
+  - type: web
+    name: potionshop-catalog-service
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Andrej_Projekat/catalog-service/Dockerfile
+    dockerContext: ./Andrej_Projekat/catalog-service
+    envVars:
+      - fromGroup: potionshop-shared
+      - key: EUREKA_TLS
+        value: "true"
+      - key: EUREKA_PREFER_IP
+        value: "false"
+      - key: EUREKA_PLAIN
+        value: "false"
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=70.0
+
+  # ------------------------------ Gateway ----------------------------------
+  - type: web
+    name: potionshop-gateway
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Andrej_Projekat/api-gateway/Dockerfile
+    dockerContext: ./Andrej_Projekat/api-gateway
+    envVars:
+      - fromGroup: potionshop-shared
+      - key: EUREKA_TLS
+        value: "true"
+      - key: EUREKA_PREFER_IP
+        value: "false"
+      - key: EUREKA_PLAIN
+        value: "false"
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=70.0
+
+  # ------------------------------ Web app ----------------------------------
+  - type: web
+    name: potionshop-web
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Andrej_Projekat/web-app/Dockerfile
+    dockerContext: ./Andrej_Projekat/web-app
+    envVars:
+      - fromGroup: potionshop-shared
+      - key: GATEWAY_URL
+        value: https://potionshop-gateway.onrender.com
+      - key: EUREKA_TLS
+        value: "true"
+      - key: EUREKA_PREFER_IP
+        value: "false"
+      - key: EUREKA_PLAIN
+        value: "false"
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=70.0

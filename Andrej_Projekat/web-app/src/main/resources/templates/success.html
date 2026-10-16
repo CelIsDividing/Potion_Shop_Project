@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Payment Successful</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; 
+            background-image: url('/images/wood-background.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh; 
+            display: flex;
+            align-items: center;
+            justify-content: center; }
+        header {
+            background-image: url('/images/plank.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            color: white;
+            padding: 16px 32px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+        }
+        header h1 { font-size: 1.4rem; letter-spacing: 1px; }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 40px 30px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            margin-top: 80px;
+        }
+        .success-icon { font-size: 3.5rem; margin-bottom: 20px; }
+        h1 { color: #16a34a; font-size: 2rem; margin-bottom: 12px; }
+        p { color: #475569; font-size: 1.05rem; margin-bottom: 24px; }
+        .logout-btn {
+            background: #fecf13; color: #000000; border: none;
+            padding: 12px 32px; border-radius: 8px; font-size: 1rem; font-weight: 600;
+            cursor: pointer;
+        }
+        .logout-btn:hover { background: #f9d856; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Potion Store</h1>
+</header>
+
+<div class="container">
+    <div class="success-icon"></div>
+    <h1>Payment Successful!</h1>
+    <p>Your potion order has been confirmed. Thank you for your purchase!</p>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit" class="logout-btn">BEGONE!</button>
+    </form>
+</div>
+</body>
+</html>

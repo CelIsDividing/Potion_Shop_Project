@@ -1,0 +1,1522 @@
+{
+  "info": {
+    "name": "Potion Shop API",
+    "_postman_id": "Potion-shop-collection-v3",
+    "description": "Postman collection for the Potion Shop microservice system.\n\nGetting started: the services must be running at http://localhost:8765.\n\nFlow: run '01 - Login'; the token is saved automatically and inserted into all subsequent requests.\n\nDefault test account: ana.jovanovic@example.com / 123\nAdmin account: admin@example.com / 123",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8765",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "adminId",
+      "value": "2",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderItemId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cardId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "newCardId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newTierId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newAllergenId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newProductId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newExtraId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Customer - Ana Jovanovic",
+      "description": "Complete customer flow. Run '01 - Login' and the token will be saved and used automatically for all other requests in the folder.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const token = pm.collectionVariables.get('token');",
+              "if (token && token.trim() !== '') {",
+              "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "01 - Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('customerId', res.id);",
+                  "pm.collectionVariables.set('token', res.token);",
+                  "pm.test('Login successful - status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns the user ID', () => pm.expect(res.id).to.be.a('number'));",
+                  "pm.test('Returns a JWT token', () => pm.expect(res.token).to.be.a('string').and.not.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana.jovanovic@example.com\",\n  \"password\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user-service/api/users/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user-service",
+                "api",
+                "users",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "02 - List my orders",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/order-service/api/orders/user/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order-service",
+                "api",
+                "orders",
+                "user",
+                "{{customerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "02b - Try to access another user's orders (should be 403)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Access denied - status 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/order-service/api/orders/user/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order-service",
+                "api",
+                "orders",
+                "user",
+                "2"
+              ]
+            }
+          }
+        },
+        {
+          "name": "03 - List my cards",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const cards = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns an array of cards', () => pm.expect(cards).to.be.an('array'));",
+                  "if (cards.length > 0) {",
+                  "    pm.collectionVariables.set('cardId', cards[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment-service/api/payments/cards/user/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-service",
+                "api",
+                "payments",
+                "cards",
+                "user",
+                "{{customerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "04 - Add a new card",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('newCardId', res.id);",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Card created', () => pm.expect(res.id).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{customerId}},\n  \"cardHolder\": \"Ana Jovanovic\",\n  \"lastFourDigits\": \"4321\",\n  \"expiryMonth\": 9,\n  \"expiryYear\": 2028\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payment-service/api/payments/cards",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-service",
+                "api",
+                "payments",
+                "cards"
+              ]
+            }
+          }
+        },
+        {
+          "name": "05 - List cards (after adding)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payment-service/api/payments/cards/user/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-service",
+                "api",
+                "payments",
+                "cards",
+                "user",
+                "{{customerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "06 - Start a new order (draft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('orderId', res.id);",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Order status is DRAFT', () => pm.expect(res.status).to.eql('DRAFT'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/order-service/api/orders/user/{{customerId}}/draft",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order-service",
+                "api",
+                "orders",
+                "user",
+                "{{customerId}}",
+                "draft"
+              ]
+            }
+          }
+        },
+        {
+          "name": "07 - Add an item to the order (Espresso)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Order has items', () => pm.expect(res.items).to.have.lengthOf.at.least(1));",
+                  "if (res.items && res.items.length > 0) {",
+                  "    pm.collectionVariables.set('orderItemId', res.items[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 1,\n  \"productName\": \"Espresso\",\n  \"price\": 150.00,\n  \"extras\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/order-service/api/orders/{{orderId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order-service",
+                "api",
+                "orders",
+                "{{orderId}}",
+                "items"
+              ]
+            }
+          }
+        },
+        {
+          "name": "08 - Add an item with an add-on (Cappuccino + Soy milk)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Order has 2 items', () => pm.expect(pm.response.json().items).to.have.lengthOf(2));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 2,\n  \"productName\": \"Cappuccino\",\n  \"price\": 200.00,\n  \"extras\": [\n    {\n      \"extraId\": 2,\n      \"extraName\": \"Sojino mleko\",\n      \"price\": 50.00\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/order-service/api/orders/{{orderId}}/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order-service",
+                "api",
+                "orders",
+                "{{orderId}}",
+                "items"
+              ]
+            }
+          }
+        },
+        {
+          "name": "09 - View the order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Order is DRAFT', () => pm.expect(res.status).to.eql('DRAFT'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/order-service/api/orders/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order-service",
+                "api",
+                "orders",
+                "{{orderId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "10 - Remove an item from the order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Order has 1 item', () => pm.expect(pm.response.json().items).to.have.lengthOf(1));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/order-service/api/orders/{{orderId}}/items/{{orderItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "order-service",
+                "api",
+                "orders",
+                "{{orderId}}",
+                "items",
+                "{{orderItemId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "11 - Pay for the order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Transakcija kreirana', () => pm.expect(pm.response.json().id).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": {{orderId}},\n  \"userId\": {{customerId}},\n  \"cardId\": {{cardId}},\n  \"amount\": 250.00,\n  \"paymentItems\": [\n    {\n      \"orderItemId\": 0,\n      \"description\": \"Cappuccino\",\n      \"amount\": 200.00\n    },\n    {\n      \"orderItemId\": 0,\n      \"description\": \"Cappuccino - Sojino mleko\",\n      \"amount\": 50.00\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payment-service/api/payments/pay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payment-service",
+                "api",
+                "payments",
+                "pay"
+              ]
+            }
+          }
+        },
+        {
+          "name": "12 - Check notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns an array of notifications', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user-service/api/notifications/user/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user-service",
+                "api",
+                "notifications",
+                "user",
+                "{{customerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "13 - Unread notifications count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user-service/api/notifications/user/{{customerId}}/unread-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user-service",
+                "api",
+                "notifications",
+                "user",
+                "{{customerId}}",
+                "unread-count"
+              ]
+            }
+          }
+        },
+        {
+          "name": "14 - Mark all notifications as read",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user-service/api/notifications/user/{{customerId}}/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user-service",
+                "api",
+                "notifications",
+                "user",
+                "{{customerId}}",
+                "read-all"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Admin User",
+      "description": "Admin flow. Run '01 - Login (Admin)' and the adminToken will be saved and used automatically.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const adminToken = pm.collectionVariables.get('adminToken');",
+              "if (adminToken && adminToken.trim() !== '') {",
+              "    pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + adminToken });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "01 - Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.collectionVariables.set('adminId', res.id);",
+                  "pm.collectionVariables.set('adminToken', res.token);",
+                  "pm.test('Login successful - status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Rola je ADMIN', () => pm.expect(res.role).to.eql('ADMIN'));",
+                  "pm.test('Returns a JWT token', () => pm.expect(res.token).to.be.a('string').and.not.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user-service/api/users/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "user-service",
+                "api",
+                "users",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Loyalty Programs",
+          "item": [
+            {
+              "name": "01 - List loyalty tiers",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Returns an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/user-service/api/loyalty-tiers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user-service",
+                    "api",
+                    "loyalty-tiers"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "02 - Add a new loyalty tier",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const res = pm.response.json();",
+                      "pm.collectionVariables.set('newTierId', res.id);",
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Tier kreiran', () => pm.expect(res.id).to.be.a('number'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"DIAMOND\",\n  \"discountPercent\": 20.00,\n  \"minPoints\": 2000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user-service/api/loyalty-tiers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user-service",
+                    "api",
+                    "loyalty-tiers"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "03 - Edit loyalty tier",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"DIAMOND\",\n  \"discountPercent\": 25.00,\n  \"minPoints\": 2500\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/user-service/api/loyalty-tiers/{{newTierId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user-service",
+                    "api",
+                    "loyalty-tiers",
+                    "{{newTierId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "04 - Delete loyalty tier",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/user-service/api/loyalty-tiers/{{newTierId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "user-service",
+                    "api",
+                    "loyalty-tiers",
+                    "{{newTierId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Catalog",
+          "item": [
+            {
+              "name": "Allergens",
+              "item": [
+                {
+                  "name": "01 - List allergens",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                          "pm.test('Returns an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/allergens",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "allergens"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "02 - Add allergen",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "const res = pm.response.json();",
+                          "pm.collectionVariables.set('newAllergenId', res.id);",
+                          "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Soy\",\n  \"description\": \"Contains soy and soy products\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/allergens",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "allergens"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "03 - Edit allergen",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Soy\",\n  \"description\": \"Contains soy, soy milk and tofu\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/allergens/{{newAllergenId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "allergens",
+                        "{{newAllergenId}}"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "04 - Delete allergen",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "DELETE",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/allergens/{{newAllergenId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "allergens",
+                        "{{newAllergenId}}"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Products",
+              "item": [
+                {
+                  "name": "01 - List products",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                          "pm.test('Returns an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/products",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "products"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "02 - Add product",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "const res = pm.response.json();",
+                          "pm.collectionVariables.set('newProductId', res.id);",
+                          "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Matcha Latte\",\n  \"description\": \"Japanese green tea with milk\",\n  \"price\": 280.00,\n  \"size\": \"M\",\n  \"calories\": 180,\n  \"allergenIds\": []\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/products",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "products"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "03 - Edit product",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Matcha Latte\",\n  \"description\": \"Premium Japanese green tea with almond milk\",\n  \"price\": 300.00,\n  \"size\": \"M\",\n  \"calories\": 160,\n  \"allergenIds\": []\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/products/{{newProductId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "products",
+                        "{{newProductId}}"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "04 - Delete product",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "DELETE",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/products/{{newProductId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "products",
+                        "{{newProductId}}"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Add-ons (Extras)",
+              "item": [
+                {
+                  "name": "01 - List add-ons",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                          "pm.test('Returns an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/extras",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "extras"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "02 - Add add-on",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "const res = pm.response.json();",
+                          "pm.collectionVariables.set('newExtraId', res.id);",
+                          "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Caramel syrup\",\n  \"description\": \"Homemade caramel syrup\",\n  \"price\": 40.00,\n  \"calories\": 60,\n  \"allergenIds\": []\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/extras",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "extras"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "03 - Edit add-on",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Caramel syrup\",\n  \"description\": \"Premium homemade caramel syrup without artificial colors\",\n  \"price\": 45.00,\n  \"calories\": 55,\n  \"allergenIds\": []\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/extras/{{newExtraId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "extras",
+                        "{{newExtraId}}"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "04 - Delete add-on",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                          "pm.test('Status 204', () => pm.response.to.have.status(204));"
+                        ]
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "DELETE",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/catalog-service/api/extras/{{newExtraId}}",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "catalog-service",
+                        "api",
+                        "extras",
+                        "{{newExtraId}}"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Analytics",
+          "item": [
+            {
+              "name": "01 - Most profitable products",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Returns an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/order-service/api/orders/analytics/top-products",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "order-service",
+                    "api",
+                    "orders",
+                    "analytics",
+                    "top-products"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "02 - Most popular add-ons",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Returns an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/order-service/api/orders/analytics/top-extras",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "order-service",
+                    "api",
+                    "orders",
+                    "analytics",
+                    "top-extras"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "03 - Revenue by day",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Returns an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-service/api/payments/analytics/revenue?period=day",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-service",
+                    "api",
+                    "payments",
+                    "analytics",
+                    "revenue"
+                  ],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "day"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "04 - Revenue by week",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-service/api/payments/analytics/revenue?period=week",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-service",
+                    "api",
+                    "payments",
+                    "analytics",
+                    "revenue"
+                  ],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "week"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "05 - Revenue by month",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-service/api/payments/analytics/revenue?period=month",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-service",
+                    "api",
+                    "payments",
+                    "analytics",
+                    "revenue"
+                  ],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "month"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "06 - VIP customers",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                      "pm.test('Returns an array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payment-service/api/payments/analytics/vip-customers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payment-service",
+                    "api",
+                    "payments",
+                    "analytics",
+                    "vip-customers"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Local secrets (never commit)
+.env
+**/.env
+
+# Project exclude paths
+/Andrej_Projekat/api-gateway/target/
+/Andrej_Projekat/catalog-service/target/
+/Andrej_Projekat/config-server/target/
+/Andrej_Projekat/eureka-server/target/
+/Andrej_Projekat/order-service/target/
+/Andrej_Projekat/payment-service/target/
+/Andrej_Projekat/user-service/target/
+/Andrej_Projekat/web-app/target/

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cards</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; 
+            background-image: url('/images/wood-background.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh; }
+        header {
+            background-image: url('/images/plank.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            color: white;
+            padding: 16px 32px; display: flex; justify-content: space-between; align-items: center;
+        }
+        header h1 { font-size: 1.4rem; letter-spacing: 1px; }
+        .logout-btn { background: transparent; border: 1px solid rgba(255,255,255,0.45); color: white; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
+        .logout-btn:hover { background: rgba(255,255,255,0.15); }
+
+        .container { max-width: 720px; margin: 40px auto; padding: 0 20px; background-image: url('/images/scroll.png');
+            background-size: 100% auto;
+            background-repeat: no-repeat;
+            background-position: center;}
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        h2 { color: #ffffff; font-size: 1.5rem; }
+        .back-link { color: #fecf13; text-decoration: none; font-size: 0.9rem; display: inline-block; margin-bottom: 20px; }
+        .back-link:hover { text-decoration: underline; }
+
+        .alert { padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 0.92rem; }
+        .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        /* ---- CARD LIST ---- */
+        .card-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 32px; }
+        .credit-card {
+            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            border-radius: 16px; padding: 22px 26px;
+            color: white; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 16px rgba(37,99,235,0.3);
+            position: relative; overflow: hidden;
+        }
+        .credit-card::before {
+            content: ''; position: absolute; top: -30px; right: -30px;
+            width: 130px; height: 130px; border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+        }
+        .credit-card::after {
+            content: ''; position: absolute; top: 20px; right: 20px;
+            width: 80px; height: 80px; border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+        .card-info { z-index: 1; background-image: url('/images/scroll.png');
+            background-size: 100% auto;
+            background-repeat: no-repeat;
+            background-position: center;}
+        .card-number { font-size: 1.15rem; font-weight: 700; letter-spacing: 3px; margin-bottom: 8px; }
+        .card-meta { font-size: 0.82rem; opacity: 0.8; }
+        .card-holder { font-size: 0.95rem; font-weight: 600; margin-top: 6px; opacity: 0.95; text-transform: uppercase; letter-spacing: 1px; }
+        .card-expiry { font-size: 0.8rem; opacity: 0.75; margin-top: 3px; }
+        .card-actions { z-index: 1; }
+        .btn-delete-card {
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4);
+            color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer;
+            font-size: 0.84rem; font-weight: 600; transition: background .15s;
+        }
+        .btn-delete-card:hover { background: rgba(220,38,38,0.7); border-color: transparent; }
+
+        .empty-state {
+            text-align: center; padding: 50px 20px; color: #94a3b8;
+            background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 32px;
+        }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+        .empty-state p { font-size: 1rem; }
+
+        /* ---- ADD CARD FORM ---- */
+        .add-card-box {
+            background: white; border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 28px;
+        }
+        .add-card-box h3 { color: #1e3a5f; font-size: 1.1rem; margin-bottom: 22px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
+        .form-group { margin-bottom: 18px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+        input {
+            width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1;
+            border-radius: 9px; font-size: 0.95rem; color: #1e293b;
+            background: #f8fafc; transition: border .15s, box-shadow .15s;
+        }
+        input:focus { outline: none; border-color: #2563eb; background: white; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+        input::placeholder { color: #94a3b8; }
+
+        /* card number with live formatting */
+        #cardNumber { letter-spacing: 2px; font-size: 1rem; }
+
+        .security-note {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.78rem; color: #94a3b8; margin-top: 6px;
+        }
+        .security-note .icon { font-size: 0.9rem; }
+
+        .btn-add {
+            width: 100%; background: #fecf13; color: #000000; border: none;
+            padding: 13px; border-radius: 9px; font-size: 1rem; font-weight: 700;
+            cursor: pointer; margin-top: 6px; letter-spacing: .3px;
+        }
+        .btn-add:hover { background: #f9d856; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Potion Store</h1>
+    <div style="display:flex;align-items:center;gap:16px;">
+        <span th:text="'Greetings, ' + ${userName}">Greetings</span>
+        <a th:href="@{/notifications}"
+           style="position:relative;color:white;text-decoration:none;font-size:1.1rem;padding:4px 8px;">
+            
+            <span th:if="${unreadNotifCount > 0}"
+                  th:text="${unreadNotifCount}"
+                  style="position:absolute;top:-4px;right:-6px;background:#ef4444;color:white;border-radius:50%;font-size:.65rem;width:17px;height:17px;display:flex;align-items:center;justify-content:center;font-weight:700;"></span>
+        </a>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn">Log Out</button>
+        </form>
+    </div>
+</header>
+
+<div class="container">
+    <a href="/orders" class="back-link">&larr; Back to Orders</a>
+
+    <div class="page-header">
+        <h2>My Cards</h2>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}"   class="alert alert-error"   th:text="${error}"></div>
+
+    <!-- Existing cards -->
+    <div th:if="${!#lists.isEmpty(cards)}" class="card-list">
+        <div th:each="card : ${cards}" class="credit-card">
+            <div class="card-info">
+                <div class="card-number" th:text="'**** **** **** ' + ${card.lastFourDigits}">**** **** **** 1234</div>
+                <div class="card-holder" th:text="${card.cardHolder}">FIRST LAST</div>
+                <div class="card-expiry" th:text="'Valid until: ' + ${card.expiryMonth} + '/' + ${card.expiryYear}">Valid until: 12/2027</div>
+            </div>
+            <div class="card-actions">
+                <form th:action="'/cards/' + ${card.id} + '/delete'" method="post"
+                      onsubmit="return confirm('Delete card ' + this.dataset.last + '?')"
+                      th:attr="data-last='**** ' + ${card.lastFourDigits}">
+                    <button type="submit" class="btn-delete-card"> Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty state -->
+    <div th:if="${#lists.isEmpty(cards)}" class="empty-state">
+        <div class="icon"></div>
+        <p>You have no saved cards.<br>Add your first card below.</p>
+    </div>
+
+    <!-- Add card form -->
+    <div class="add-card-box">
+        <h3> Add New Card</h3>
+        <form action="/cards" method="post" id="addCardForm">
+
+            <div class="form-group">
+                <label>Card Holder Name</label>
+                <input type="text" name="cardHolder" id="cardHolder"
+                       placeholder="e.g. Ana Jovanovic" required maxlength="100"/>
+            </div>
+
+            <div class="form-group">
+                <label>Card Number</label>
+                <input type="text" name="cardNumber" id="cardNumber"
+                       placeholder="1234 5678 9012 3456"
+                       maxlength="19" required autocomplete="cc-number"/>
+                <div class="security-note">
+                    <span class="icon"></span>
+                    <span>Card number is not stored &mdash; we only keep the last 4 digits.</span>
+                </div>
+            </div>
+
+            <div class="form-row-3">
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>CVV</label>
+                    <input type="password" name="cvv" id="cvv"
+                           placeholder="123" maxlength="4" required autocomplete="cc-csc"/>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Expiration Month</label>
+                    <input type="number" name="expiryMonth" id="expiryMonth"
+                           placeholder="MM" min="1" max="12" required autocomplete="cc-exp-month"/>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Expiry Year</label>
+                    <input type="number" name="expiryYear" id="expiryYear"
+                           placeholder="YYYY" min="2024" max="2040" required autocomplete="cc-exp-year"/>
+                </div>
+            </div>
+
+            <div style="margin-top:20px;">
+                <button type="submit" class="btn-add">Save Card</button>
+                <p class="security-note" style="margin-top:10px;justify-content:center;">
+                    <span class="icon"></span>
+                    <span>CVV is not stored and is used only for validation.</span>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Live card number formatting: 1234 5678 9012 3456
+    document.getElementById('cardNumber').addEventListener('input', function (e) {
+        let val = e.target.value.replace(/\D/g, '').substring(0, 16);
+        e.target.value = val.replace(/(.{4})/g, '$1 ').trim();
+    });
+
+    // Allow only digits in CVV
+    document.getElementById('cvv').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+    });
+
+    // Client-side validation before submit
+    document.getElementById('addCardForm').addEventListener('submit', function (e) {
+        const num = document.getElementById('cardNumber').value.replace(/\s/g, '');
+        const cvv = document.getElementById('cvv').value;
+        const month = parseInt(document.getElementById('expiryMonth').value);
+        const year = parseInt(document.getElementById('expiryYear').value);
+        const now = new Date();
+
+        if (num.length !== 16) {
+            e.preventDefault();
+            alert('Card number must have exactly 16 digits.');
+            return;
+        }
+        if (cvv.length < 3) {
+            e.preventDefault();
+            alert('CVV must have 3 or 4 digits.');
+            return;
+        }
+        if (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1)) {
+            e.preventDefault();
+            alert('Card has expired.');
+        }
+    });
+</script>
+</body>
+</html>
