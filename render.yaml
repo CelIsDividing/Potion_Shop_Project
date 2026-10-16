@@ -27,6 +27,12 @@
 envVarGroups:
   - name: potionshop-shared
     envVars:
+      # Activate the "docker" Spring profile so each service loads
+      # application-docker.properties (DB config, ${PORT} binding, EUREKA_URL,
+      # Eureka TLS settings, ...). Without this the JPA services start with no
+      # datasource and the deploy fails.
+      - key: SPRING_PROFILES_ACTIVE
+        value: docker
       # External PostgreSQL connection (filled in the Render dashboard).
       # DB_URL example: jdbc:postgresql://HOST:5432/potionShop?sslmode=require
       - key: DB_URL
